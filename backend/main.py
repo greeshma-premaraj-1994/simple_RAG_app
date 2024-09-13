@@ -1,11 +1,21 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from langchain.chains import ConversationalRetrievalChain, ConversationBufferMemory
-from langchain.vectorstores import Qdrant
+from fastapi.middleware.cors import CORSMiddleware
+from langchain.chains import ConversationalRetrievalChain
+from langchain.memory import ConversationBufferMemory
+# from langchain.chains import RetrievalQA, RAGChain, MultiQueryRetriever, ChainRouter
+# from langchain.vectorstores import Qdrant
+from langchain_qdrant import QdrantVectorStore 
 from langchain.embeddings import SentenceTransformerEmbeddings
+from langchain.embeddings import LangChainEmbeddings
+
 from sentence_transformers import SentenceTransformer
 from qdrant_client import QdrantClient
 import logging
+import openai
+import os
 
+# Load the API key
+openai_api_key = os.getenv("OPENAI_API_KEY")
 logging.basicConfig(level=logging.INFO)
 
 app = FastAPI()
@@ -20,13 +30,16 @@ app.add_middleware(
 
 qdrant_client = QdrantClient(host="localhost", port=6333)
 
+embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
 embedding_model_name = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 model = SentenceTransformer(embedding_model_name)
-
-vector_store = Qdrant(
-    qdrant_client=qdrant_client, 
-    collection_name="document_index", 
-    embedding_function=model.encode  
+# def embed_texts(texts):
+#     return model.encode(texts, convert_to_tensor=True).tolist()
+# embeddings = embed_texts('')
+vector_store = QdrantVectorStore.from_existing_collection(
+    embeddings=embeddings,
+    collection_name="document_index",
+    url="http://localhost:6333",
 )
 
 memory = ConversationBufferMemory()
