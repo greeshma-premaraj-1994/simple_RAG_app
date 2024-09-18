@@ -43,16 +43,18 @@ def create_collection_if_not_exists(collection_name, vector_size):
         logging.info(f"Creating collection '{collection_name}'.")
         qdrant_client.create_collection(
             collection_name=collection_name,
-            vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE),
+            # vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE),
+            vectors_config=VectorParams(size=768, distance=Distance.COSINE),
         )
 
 # Function to index documents by converting them into vectors and storing them in Qdrant
 def index_documents(file_path):
     # Load and split the document into text chunks
     texts = load_and_split_document(file_path)
-    
+    print("model.get_sentence_embedding_dimension()",model.get_sentence_embedding_dimension())
     # Create the collection in Qdrant if it doesn't exist
     create_collection_if_not_exists(COLLECTION_NAME, model.get_sentence_embedding_dimension())
+    
     
     # Iterate over each text chunk and index it
     for i, text in enumerate(texts):
