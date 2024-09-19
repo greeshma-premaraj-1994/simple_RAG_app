@@ -5,19 +5,30 @@ from sentence_transformers import SentenceTransformer
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams, PointStruct
 import logging
+from dotenv import load_dotenv
+
+# Load .env file
+load_dotenv()
 
 # Configure logging to show info level messages
 logging.basicConfig(level=logging.INFO)
 
-# Define constants for collection name and embedding model
-# COLLECTION_NAME = "document_index"
-EMBEDDING_MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+# Define constants 
+EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME")
+ARABIC_COLLECTION_NAME = os.getenv("ARABIC_COLLECTION_NAME")
+ENGLISH_COLLECTION_NAME = os.getenv("ENGLISH_COLLECTION_NAME")
+ARABIC_DOC_PATH = os.getenv("ARABIC_DOC_PATH")
+ENGLISH_DOC_PATH = os.getenv("ENGLISH_DOC_PATH")
+
 
 # Initialize Qdrant client for interacting with the vector store
 qdrant_client = QdrantClient(host="localhost", port=6333, timeout=30)
 
 # Initialize SentenceTransformer model for generating embeddings
 model = SentenceTransformer(EMBEDDING_MODEL_NAME)
+
+
+#  -------------------------Document Augmentation and Indexing:-------------------------------------------------
 
 # Function to load and split a PDF document into chunks
 def load_and_split_document(file_path):
@@ -71,9 +82,9 @@ def index_documents(file_path,COLLECTION_NAME):
 # Main execution block
 if __name__ == "__main__":
     # Define file paths for the documents to be indexed
-    english_doc_path = "docs/Executive Regulation Law No 6-2016 - English[1].pdf"
-    arabic_doc_path = "docs/Executive Regulation Law No 6-2016[1].pdf"
+    english_doc_path = ENGLISH_DOC_PATH
+    arabic_doc_path = ARABIC_DOC_PATH
     
     # Index both the English and Arabic documents
-    index_documents(english_doc_path,"english_documents_collection")
-    index_documents(arabic_doc_path,"arabic_documents_collection")
+    index_documents(english_doc_path,ENGLISH_COLLECTION_NAME)
+    index_documents(arabic_doc_path,ARABIC_COLLECTION_NAME)
