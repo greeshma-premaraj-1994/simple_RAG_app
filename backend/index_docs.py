@@ -10,7 +10,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 # Define constants for collection name and embedding model
-COLLECTION_NAME = "document_index"
+# COLLECTION_NAME = "document_index"
 EMBEDDING_MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 
 # Initialize Qdrant client for interacting with the vector store
@@ -43,12 +43,12 @@ def create_collection_if_not_exists(collection_name, vector_size):
         logging.info(f"Creating collection '{collection_name}'.")
         qdrant_client.create_collection(
             collection_name=collection_name,
-            # vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE),
-            vectors_config=VectorParams(size=768, distance=Distance.COSINE),
+            vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE),
+            # vectors_config=VectorParams(size=768, distance=Distance.COSINE),
         )
 
 # Function to index documents by converting them into vectors and storing them in Qdrant
-def index_documents(file_path):
+def index_documents(file_path,COLLECTION_NAME):
     # Load and split the document into text chunks
     texts = load_and_split_document(file_path)
     print("model.get_sentence_embedding_dimension()",model.get_sentence_embedding_dimension())
@@ -75,5 +75,5 @@ if __name__ == "__main__":
     arabic_doc_path = "docs/Executive Regulation Law No 6-2016[1].pdf"
     
     # Index both the English and Arabic documents
-    index_documents(english_doc_path)
-    index_documents(arabic_doc_path)
+    index_documents(english_doc_path,"english_documents_collection")
+    index_documents(arabic_doc_path,"arabic_documents_collection")
